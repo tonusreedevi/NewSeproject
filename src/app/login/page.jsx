@@ -1,19 +1,68 @@
+
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const LoginPage = () => {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (!email || !password) {
+      alert("Please enter your email and password.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert(error.message || "Login failed");
+        return;
+      }
+
+      if (data) {
+        alert("Login successful!");
+
+        // Go to home page
+        router.push("/");
+
+        // Refresh the page so the session is updated
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
-
       <div className="mx-auto flex min-h-screen max-w-7xl items-center px-6 py-10">
 
         <div className="grid w-full overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_20px_70px_rgba(47,53,66,0.08)] lg:grid-cols-2">
 
           {/* ================= LEFT SIDE ================= */}
+
           <div className="hidden bg-[#0454D9] p-12 lg:flex lg:flex-col lg:justify-between">
 
             {/* Logo */}
@@ -90,6 +139,7 @@ const LoginPage = () => {
           </div>
 
           {/* ================= RIGHT SIDE ================= */}
+
           <div className="flex items-center p-7 sm:p-10 lg:p-14">
 
             <div className="w-full">
@@ -124,7 +174,10 @@ const LoginPage = () => {
               </div>
 
               {/* Form */}
-              <form className="mt-8 space-y-5">
+              <form
+                onSubmit={onSubmit}
+                className="mt-8 space-y-5"
+              >
 
                 {/* Email */}
                 <div>
@@ -134,6 +187,8 @@ const LoginPage = () => {
 
                   <input
                     type="email"
+                    name="email"
+                    required
                     placeholder="you@example.com"
                     className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-[#2F3542] outline-none transition placeholder:text-gray-400 focus:border-[#0454D9] focus:ring-4 focus:ring-[#0454D9]/10"
                   />
@@ -161,6 +216,8 @@ const LoginPage = () => {
 
                     <input
                       type={showPassword ? "text" : "password"}
+                      name="password"
+                      required
                       placeholder="Enter your password"
                       className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3.5 pr-16 text-sm text-[#2F3542] outline-none transition placeholder:text-gray-400 focus:border-[#0454D9] focus:ring-4 focus:ring-[#0454D9]/10"
                     />
@@ -183,6 +240,7 @@ const LoginPage = () => {
                   <input
                     id="remember"
                     type="checkbox"
+                    name="remember"
                     className="h-4 w-4 rounded border-gray-300 accent-[#0454D9]"
                   />
 
@@ -198,9 +256,10 @@ const LoginPage = () => {
                 {/* Login */}
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-[#0454D9] py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(4,84,217,0.18)] transition hover:-translate-y-0.5 hover:bg-[#0349BE]"
+                  disabled={loading}
+                  className="w-full rounded-xl bg-[#0454D9] py-3.5 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(4,84,217,0.18)] transition hover:-translate-y-0.5 hover:bg-[#0349BE] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Log In
+                  {loading ? "Logging in..." : "Log In"}
                 </button>
 
               </form>
@@ -231,6 +290,7 @@ const LoginPage = () => {
               {/* Signup */}
               <p className="mt-7 text-center text-sm text-gray-400">
                 Don't have an account?{" "}
+
                 <Link
                   href="/signup"
                   className="font-semibold text-[#0454D9] hover:underline"
@@ -246,7 +306,6 @@ const LoginPage = () => {
         </div>
 
       </div>
-
     </main>
   );
 };
