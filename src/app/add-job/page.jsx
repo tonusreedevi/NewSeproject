@@ -29,7 +29,7 @@ const AddJobs = () => {
     const job = Object.fromEntries(formData.entries());
 
     try {
-      const res = await fetch("http://newprojectserver.vercel.app/job", {
+      const res = await fetch("https://newprojectserver.vercel.app/job", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

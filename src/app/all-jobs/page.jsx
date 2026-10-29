@@ -16,7 +16,7 @@ import Link from "next/link";
 
 
 const AllJobsPage = async () => {
-  const res = await fetch("http://newprojectserver.vercel.app/job", {
+  const res = await fetch("https://newprojectserver.vercel.app/job", {
     cache: "no-store",
   });
 
